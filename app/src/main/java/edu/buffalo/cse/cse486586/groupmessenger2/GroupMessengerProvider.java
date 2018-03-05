@@ -3,8 +3,11 @@ package edu.buffalo.cse.cse486586.groupmessenger2;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
+import edu.buffalo.cse.cse486586.groupmessenger2.GroupMessengerSchema.GroupMessageEntry;
 
 /**
  * GroupMessengerProvider is a key-value table. Once again, please note that we do not implement
@@ -26,6 +29,10 @@ import android.util.Log;
  */
 public class GroupMessengerProvider extends ContentProvider {
 
+    static final String TAG = GroupMessengerProvider.class.getSimpleName();
+    GroupMessengerDbHelper dbHelper;
+    SQLiteDatabase db;
+
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // You do not need to implement this.
@@ -41,16 +48,23 @@ public class GroupMessengerProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         /*
-         * TODO: You need to implement this method. Note that values will have two columns (a key
+         * values will have two columns (a key
          * column and a value column) and one row that contains the actual (key, value) pair to be
          * inserted.
-         * 
-         * For actual storage, you can use any option. If you know how to use SQL, then you can use
-         * SQLite. But this is not a requirement. You can use other storage options, such as the
-         * internal storage option that we used in PA1. If you want to use that option, please
-         * take a look at the code for PA1.
+         *
+         * Used SQLite for database
          */
-        Log.v("insert", values.toString());
+        Log.v(TAG,"insert "+values.toString());
+        dbHelper = new GroupMessengerDbHelper(this.getContext());
+        String key = (String) values.get(GroupMessengerSchema.GroupMessageEntry.COLUMN_NAME_KEY);
+        Cursor cursor = query(uri,null, key, null, null);
+        db = dbHelper.getWritableDatabase();
+
+        if(cursor.getCount() == 0 ) {
+            db.insert(GroupMessageEntry.TABLE_NAME, null, values);
+        } else {
+            update(uri, values, key, null);
+        }
         return uri;
     }
 
@@ -62,25 +76,59 @@ public class GroupMessengerProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        // You do not need to implement this.
-        return 0;
+        // Which row to update, based on the title
+        String mSelection = GroupMessageEntry.COLUMN_NAME_KEY + " LIKE ?";
+        String key = (String) values.get(GroupMessageEntry.COLUMN_NAME_KEY);
+        String[] mSelectionArgs = { key };
+
+        int count = db.update(
+                GroupMessageEntry.TABLE_NAME,
+                values,
+                mSelection,
+                mSelectionArgs);
+
+        return count;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        /*
-         * TODO: You need to implement this method. Note that you need to return a Cursor object
-         * with the right format. If the formatting is not correct, then it is not going to work.
-         *
-         * If you use SQLite, whatever is returned from SQLite is a Cursor object. However, you
-         * still need to be careful because the formatting might still be incorrect.
-         *
-         * If you use a file storage option, then it is your job to build a Cursor * object. I
-         * recommend building a MatrixCursor described at:
-         * http://developer.android.com/reference/android/database/MatrixCursor.html
-         */
-        Log.v("query", selection);
-        return null;
+        dbHelper = new GroupMessengerDbHelper(this.getContext());
+        db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+
+        try{
+            //Querying for all the messages
+            if(selection == null) {
+                cursor = db.query(
+                        GroupMessageEntry.TABLE_NAME,   // The table to query
+                        projection,                     // The columns to return
+                        null,                     // The columns for the WHERE clause
+                        null,                     // The values for the WHERE clause
+                        null,                  // don't group the rows
+                        null,                   // don't filter by row groups
+                        sortOrder                      // The sort order
+                );
+            } else {
+                Log.v("query", selection);
+                String mSelection = GroupMessageEntry.COLUMN_NAME_KEY + " = ?";
+                String[] mSelectArg = { selection };
+
+                cursor = db.query(
+                        GroupMessageEntry.TABLE_NAME,   // The table to query
+                        projection,                     // The columns to return
+                        mSelection,                     // The columns for the WHERE clause
+                        mSelectArg,                     // The values for the WHERE clause
+                        null,                  // don't group the rows
+                        null,                   // don't filter by row groups
+                        sortOrder                      // The sort order
+                );
+            }
+        } catch (Exception e) {
+            Log.e(TAG,e.getMessage());
+        }
+        finally {
+            return cursor;
+        }
     }
 }
