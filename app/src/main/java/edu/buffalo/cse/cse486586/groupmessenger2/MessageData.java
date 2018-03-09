@@ -4,30 +4,56 @@ package edu.buffalo.cse.cse486586.groupmessenger2;
  * Created by veera on 3/4/18.
  */
 
-public class MessageData {
-    Integer seqNo;
+public class MessageData implements Comparable<MessageData> {
+
+    Integer id;
     String message;
-    Proposal proposals;
-    boolean isDeliverable;
-    Integer proposalCount;
+    Integer initialSeqNo;
+    Integer owner;
+    Integer proposedseqNo;
+    Integer proposer;
+    int isDeliverable;
 
-    public MessageData(Integer seqNo, String message, Proposal proposals, boolean isDeliverable, Integer proposalCount) {
-        this.seqNo = seqNo;
+
+    public MessageData() {
+
+    }
+
+    public MessageData(Integer id, String message, Integer initialSeqNo, Integer owner, Integer proposedseqNo, Integer proposer, int isDeliverable) {
+        this.id = id;
         this.message = message;
-        this.proposals = proposals;
+        this.initialSeqNo = initialSeqNo;
+        this.owner = owner;
+        this.proposedseqNo = proposedseqNo;
+        this.proposer = proposer;
         this.isDeliverable = isDeliverable;
-        this.proposalCount = proposalCount;
     }
 
-    class Proposal {
-        Integer id;
-        Integer SeqNo;
-        boolean isAlive;
-
-        public Proposal(Integer id, Integer seqNo, boolean isAlive) {
-            this.id = id;
-            SeqNo = seqNo;
-            this.isAlive = isAlive;
+    //ToDo: Need to check if this proirity is okay
+    @Override
+    public int compareTo(MessageData another) {
+        if (this.proposedseqNo == another.proposedseqNo) {
+            return this.proposer - another.proposer;
+        } else {
+            //Smallest Sequence No at the head
+            return this.proposedseqNo - another.proposedseqNo;
         }
+
+        /*
+        if (this.proposedseqNo == another.proposedseqNo) {
+            if(this.isDeliverable == another.isDeliverable) {
+                //Placing messages from lower process at the head
+                return this.proposer - another.proposer;
+            } else {
+                //Placing undeliverable messages at the head
+                return this.isDeliverable - another.isDeliverable;
+            }
+
+        } else {
+            //Smallest Sequence No at the head
+            return this.proposedseqNo - another.proposedseqNo;
+        }
+         */
     }
+
 }

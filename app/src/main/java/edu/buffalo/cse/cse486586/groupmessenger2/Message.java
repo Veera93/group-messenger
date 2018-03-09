@@ -5,18 +5,24 @@ package edu.buffalo.cse.cse486586.groupmessenger2;
  */
 
 public class Message {
+    Integer failedPort;
     Integer seqNo;
-    String message;
-    Integer proposer;
+    Integer owner;
     String type;
+    String message;
+    Integer id;
 
-    public Message(Integer seqNo, String message, Integer proposer, String type) {
+    public Message(Integer seqNo,Integer owner, String type,  String message, Integer failedPort) {
         this.seqNo = seqNo;
         this.message = message;
-        this.proposer = proposer;
+        this.owner = owner;
         this.type = type;
+        this.failedPort = failedPort;
     }
+
     public String concatMessage() {
-        return this.seqNo+":"+this.message+":"+this.proposer+this.type;
+        String temp = this.seqNo + this.owner + this.message;
+        this.id = temp.hashCode();
+        return this.failedPort+"::"+this.seqNo+"::"+this.owner+"::"+this.type+"::"+this.id+"::"+this.message;
     }
 }
