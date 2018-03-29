@@ -16,6 +16,7 @@ import edu.buffalo.cse.cse486586.groupmessenger2.GroupMessengerSchema.GroupMessa
  */
 
 public class GroupMessengeDbHandler {
+
     private static final String TAG = GroupMessengeDbHandler.class.getName();
     private final ContentResolver mContentResolver;
     private final Uri mUri;
@@ -59,7 +60,6 @@ public class GroupMessengeDbHandler {
     /*
      * Checks if the key is already present in the table
      */
-
     public boolean isKeyPresent(String key) {
         ContentValues values = new ContentValues();
         values.put(GroupMessageEntry.COLUMN_NAME_KEY, key);
@@ -85,7 +85,6 @@ public class GroupMessengeDbHandler {
     /*
      * Queries all the messages from the table
      */
-
     public String[] queryAllMessages() {
         String[] messages= null;
         Cursor resultCursor = null;
@@ -109,7 +108,6 @@ public class GroupMessengeDbHandler {
     /*
      * Queries the message for the given key from the table
      */
-
     public String queryMessage(String key) {
         Cursor resultCursor=null;
         String value = null;

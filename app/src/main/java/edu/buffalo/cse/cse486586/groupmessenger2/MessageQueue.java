@@ -4,7 +4,7 @@ package edu.buffalo.cse.cse486586.groupmessenger2;
  * Created by veera on 3/4/18.
  */
 
-public class MessageData implements Comparable<MessageData> {
+public class MessageQueue implements Comparable<MessageQueue> {
 
     Integer id;
     String message;
@@ -15,11 +15,11 @@ public class MessageData implements Comparable<MessageData> {
     int isDeliverable;
 
 
-    public MessageData() {
+    public MessageQueue() {
 
     }
 
-    public MessageData(Integer id, String message, Integer initialSeqNo, Integer owner, Integer proposedseqNo, Integer proposer, int isDeliverable) {
+    public MessageQueue(Integer id, String message, Integer initialSeqNo, Integer owner, Integer proposedseqNo, Integer proposer, int isDeliverable) {
         this.id = id;
         this.message = message;
         this.initialSeqNo = initialSeqNo;
@@ -31,7 +31,7 @@ public class MessageData implements Comparable<MessageData> {
 
     //ToDo: Need to check if this proirity is okay
     @Override
-    public int compareTo(MessageData another) {
+    public int compareTo(MessageQueue another) {
         if (this.proposedseqNo == another.proposedseqNo) {
             return this.proposer - another.proposer;
         } else {

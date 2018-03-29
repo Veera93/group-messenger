@@ -14,6 +14,7 @@ import edu.buffalo.cse.cse486586.groupmessenger2.GroupMessengerSchema.GroupMessa
  * Helper class that manages table creation and upgrades table if needed
  */
 
+// From developers.android.com
 public class GroupMessengerDbHelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;

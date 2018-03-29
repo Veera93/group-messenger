@@ -24,7 +24,7 @@ import edu.buffalo.cse.cse486586.groupmessenger2.GroupMessengerSchema.GroupMessa
  * There are two methods you need to implement---insert() and query(). Others are optional and
  * will not be tested.
  * 
- * @author stevko
+ * @author veera
  *
  */
 public class GroupMessengerProvider extends ContentProvider {

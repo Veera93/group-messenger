@@ -10,6 +10,7 @@ import android.provider.BaseColumns;
  * Defines the schema of the Table
  */
 
+//From: developers.android.com
 public final class GroupMessengerSchema {
     // To prevent someone from accidentally instantiating the contract class,
     // make the constructor private.

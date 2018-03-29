@@ -12,63 +12,32 @@ import java.util.PriorityQueue;
 
 public class ISISHelper {
 
-    PriorityQueue<MessageData> message = new PriorityQueue<MessageData>();
+    PriorityQueue<MessageQueue> holdbackQueue = new PriorityQueue<MessageQueue>();
     static final String TAG = ISISHelper.class.getSimpleName();
 
-    public ISISRespone newMessage(Integer proposedSeq, Integer proposer, String msg) {
-        /*
-            Parsed Message Data structure
-            0 Failed port
-            1 Initial Sequence No
-            2 Owner
-            3 Type
-            4 Id
-            5 Message
-         */
-
-        String[] parsedMsg = msg.split("::",6);
-
-        /* Message data structure
-             1 id
-             2 message
-             3 initialSeqNo
-             4 owner
-             5 proposedseqNo
-             6 proposer
-             7 isDeliverable
-         */
-        MessageData messageData = new MessageData(Integer.parseInt(parsedMsg[4]), parsedMsg[5], Integer.parseInt(parsedMsg[1]), Integer.parseInt(parsedMsg[2]), proposedSeq, proposer, 0);
-        message.add(messageData);
-
+    public ISISResponse newMessage(Integer proposedSeq, Integer proposer, String msg) {
+        String[] parsedMsg = msg.split(GroupMessengerConfiguration.DELIMITER,6);
+        MessageQueue messageData = new MessageQueue(Integer.parseInt(parsedMsg[4]), parsedMsg[5], Integer.parseInt(parsedMsg[1]), Integer.parseInt(parsedMsg[2]), proposedSeq, proposer, 0);
+        holdbackQueue.add(messageData);
         String deliverableMessage[] = checkDelivery();
-
-        return new ISISRespone(true, deliverableMessage);
+        return new ISISResponse(true, deliverableMessage);
     }
 
     public String[] agreedOnProposal(String msg) {
-        /*
-            Parsed Message Data structure
-            0 Failure
-            1 Message Id
-            2 Owner
-            3 Type
-            4 Agreed Seq
-            5 Proposer
-         */
-        String[] parsedMsg = msg.split("::",6);
+        String[] parsedMsg = msg.split(GroupMessengerConfiguration.DELIMITER,6);
         Integer msgId = Integer.parseInt(parsedMsg[1]);
         Integer agreedProposedSeqNo = Integer.parseInt(parsedMsg[4]);
         Integer agreedProposedSeqNoProposer = Integer.parseInt(parsedMsg[5]);
-        for (MessageData element : message) {
+        for (MessageQueue element : holdbackQueue) {
             if(element.id.intValue() == msgId.intValue()) {
-                MessageData temp = element;
-                message.remove(element);
+                MessageQueue temp = element;
+                holdbackQueue.remove(element);
                 if(temp.proposedseqNo < agreedProposedSeqNo) {
                     temp.proposedseqNo = agreedProposedSeqNo;
                     temp.proposer = agreedProposedSeqNoProposer;
                 }
                 temp.isDeliverable = 1;
-                message.add(temp);
+                holdbackQueue.add(temp);
             }
         }
         return checkDelivery();
@@ -76,9 +45,9 @@ public class ISISHelper {
 
     private String[] checkDelivery() {
         ArrayList<String> deliverableMessages = new ArrayList<String>();
-        while(message.peek() != null && message.peek().isDeliverable == 1) {
+        while(holdbackQueue.peek() != null && holdbackQueue.peek().isDeliverable == 1) {
             //Deliver the message to the application
-            MessageData data = message.poll();
+            MessageQueue data = holdbackQueue.poll();
             if(data != null)
                 deliverableMessages.add(data.message);
         }
@@ -89,20 +58,19 @@ public class ISISHelper {
     }
 
     public boolean removeMessages(Integer owner) {
-        for(MessageData element : message) {
+        for(MessageQueue element : holdbackQueue) {
             if(element.owner.intValue() == owner.intValue()) {
-                message.remove(element);
+                holdbackQueue.remove(element);
             }
         }
         return true;
     }
 
-
-    static class ISISRespone {
+    static class ISISResponse {
         boolean status;
         String[] deliverableMessage;
 
-        public ISISRespone(boolean status, String[] deliverableMessage) {
+        public ISISResponse(boolean status, String[] deliverableMessage) {
             this.status = status;
             this.deliverableMessage = deliverableMessage;
         }
